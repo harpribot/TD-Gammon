@@ -12,4 +12,4 @@ The output of the codes is farely self explanatory which one can easily understa
 
 # Enjoy!!
 
-# Updated for CompEng 6320 (Adaptive Dynamic Programming)
+
