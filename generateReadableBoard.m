@@ -2,9 +2,12 @@
 % See the License document for further information
 function boardReadable = generateReadableBoard( board )
 % Generate the visually readable board from the input vector type board
-% boardReadable = 2 x 27 matrix [bar,homeUser,1 to 24,homeAgent]
-% 1st Row - agentCount
-% 2nd Row - userCount
+% boardReadable = 2 x 27 matrix [-1,0,1 to 24,25]
+% -1 --> On the bar
+% 0  --> home of the user
+% 25 --> home of the agent
+% 1st Row - agent Count
+% 2nd Row - user Count
 boardReadable = zeros(2,27);
 for i = 1:27
     % On the bar
@@ -13,12 +16,12 @@ for i = 1:27
         boardReadable(2,i) = 2 * board(196);
     % Home state of the user
     elseif(i == 2)
-        boardReadable(1,i) = NaN;
+        boardReadable(1,i) = 0;
         boardReadable(2,i) = 15 * board(198);
     % Home state of the agent
     elseif(i == 27)
         boardReadable(1,i) = 15 * board(197);
-        boardReadable(2,i) = NaN;
+        boardReadable(2,i) = 0;
     % For checkers on the board
     else
         iBoard = i - 2;
