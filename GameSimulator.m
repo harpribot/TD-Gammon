@@ -8,7 +8,8 @@ load('bestUser16kIteration.mat');
 whoWon = ID.NULL;
 
 %% throw in dice to decide whose first
-areDiesSame = true;
+userTurn = mod(abs(round(randn)),2);
+areDiesSame = false; % make this true if you want to manually enter
 while(areDiesSame == true)
     agentProxyDie = randi(6,[1,1]);
     userProxyDie = str2double(input('Enter Value Please [1 to 6]: ','s'));
@@ -16,7 +17,7 @@ while(areDiesSame == true)
         areDiesSame = false;
         if(agentProxyDie > userProxyDie)
             userTurn = 0;
-            disp('Copmuter Agent Goes First');
+            disp('Computer Agent Goes First');
         else
             userTurn = 1;
             disp('User Goes First');
@@ -30,7 +31,9 @@ boardReadable = generateReadableBoard(boardPresent);
 boardIndex = -1:1:25;
 doublingCube = {1,ID.NULL}; %[cubeValue,cubeOwner]
 disp('Board State at present:');
-disp(boardIndex),disp(boardReadable);
+% disp(boardIndex),printBoard(boardReadable);
+printBoard(boardReadable);
+
 
 %% Play Game
 while(whoWon == ID.NULL)
@@ -65,7 +68,7 @@ while(whoWon == ID.NULL)
         correctMoveMade = false;
         while(correctMoveMade == false)
             userMove = str2num(input('Write Your move in vector format separated by commas (0 to surrender turn):', 's'));
-            % in case the user surrenders his move - Enter 0 if wanna surrender
+            % in case the user surrenders his move - Enter 0 if want to surrender
             if(userMove == 0)
                 boardPresent(193) = 1;
                 boardPresent(194) = 0;
@@ -87,7 +90,7 @@ while(whoWon == ID.NULL)
                         boardPresent = generateBoardFromMove(userMove,boardPresent,false);
                         boardReadable = generateReadableBoard(boardPresent);
                         disp('Board State at present:');
-                        disp(boardReadable);
+                        printBoard(boardReadable);
                         userTurn = ~userTurn;
                     end
                 end
@@ -115,7 +118,7 @@ while(whoWon == ID.NULL)
         boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
         boardReadable = generateReadableBoard(boardPresent);
         disp('Board State at present:');
-        disp(boardReadable);
+        printBoard(boardReadable);
         userTurn = ~userTurn; 
     end
 
@@ -130,7 +133,7 @@ while(whoWon == ID.NULL)
         fprintf('Agent Won');  
     else
         
-        % Doubling Desicion
+        % Doubling Decision
 %         if(userTurn)
 %             % ask user for double decision
 %             userPropose = str2num(input('Would you Like to double? (0 or 1):', 's'));
