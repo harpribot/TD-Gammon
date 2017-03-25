@@ -1,0 +1,15 @@
+% Copyright @2015 MIT License - Author - Garrett Kaiser
+% See the License document for further information
+% checks the input vector is a valid set of moves
+function valid = MoveDirectionValid(move)
+    valid = false;
+    moveA = move(1:2:end);
+    moveB = move(2:2:end);
+    negIndex = find(moveA <  0);
+    posIndex = find(moveA >= 0);
+    if(sum(moveA(posIndex) >= moveB(posIndex)) == length(posIndex) || ...
+            sum(moveA(posIndex) >= moveB(posIndex)) == length(negIndex))
+        valid = true;
+    end
+    
+end
