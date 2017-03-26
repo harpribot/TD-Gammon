@@ -9,37 +9,21 @@ function printBoard( boardReadable )
 %     AI |   0| NaN|   2|   0|   0|   0|   0|   0|   0|   0|   0|   0|   0|   5|   0|   0|   0|   0|   3|   0|   5|   0|   0|   0|   0|   0|   0|
 %  Human |   0|   0|   0|   0|   0|   0|   0|   5|   0|   3|   0|   0|   0|   0|   5|   0|   0|   0|   0|   0|   0|   0|   0|   0|   0|   2| NaN|
 
-boardStr = ''; % not used 
+Index = 0:1:25; 
 
-readableIndex = -1:1:25; 
-
-% print the index values 
 fprintf('Index | Bar|') 
-for n = 2:1:length(readableIndex)
-	fprintf('% 4d|', readableIndex(n)) 
-end 
+fprintf('%4d|', Index)
 fprintf('\n')
 
-% Print the line between the index and values
-fprintf('      |') 
-for n = 1:1:(length(readableIndex)-1)
-	fprintf('----+', readableIndex(n)) 
-end 
-fprintf('----|\n')
+fprintf('      |%s----|\n',repmat('----+',1,26))
 
-% print the AI piece positions 
 fprintf('   AI |') 
-for n = 1:1:length(readableIndex)
-	fprintf('% 4d|', boardReadable(1,n)) 
-end 
+fprintf('%4d|', boardReadable(1,:)) 
 fprintf('\n')
 
-% print the human piece positions 
 fprintf('Human |') 
-for n = 1:1:length(readableIndex)
-	fprintf('% 4d|', boardReadable(2,n)) 
-end 
-fprintf('\n')
+fprintf('%4d|', boardReadable(2,:)) 
+fprintf('\n\n')
 
 end % function 
 

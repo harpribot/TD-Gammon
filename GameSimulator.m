@@ -2,7 +2,7 @@
 % See the License document for further information
 % Game Simulation for TD-Gammon
 %% Initial Setup
-clc;
+close all; clear all; clc;
 % load the learnt parameters after 16k iterations
 load('bestUser16kIteration.mat');
 whoWon = ID.NULL;
