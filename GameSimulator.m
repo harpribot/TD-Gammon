@@ -8,7 +8,7 @@ load('bestUser16kIteration.mat');
 whoWon = ID.NULL;
 
 %% throw in dice to decide whose first
-userTurn = mod(abs(round(randn)),2);
+userTurn = randi([0,1]);
 areDiesSame = false; % make this true if you want to manually enter
 while(areDiesSame == true)
     agentProxyDie = randi(6,[1,1]);
@@ -31,9 +31,8 @@ boardReadable = generateReadableBoard(boardPresent);
 boardIndex = -1:1:25;
 doublingCube = {1,ID.NULL}; %[cubeValue,cubeOwner]
 disp('Board State at present:');
-% disp(boardIndex),printBoard(boardReadable);
+% disp(boardIndex),disp(boardReadable);
 printBoard(boardReadable);
-
 
 %% Play Game
 while(whoWon == ID.NULL)
@@ -154,7 +153,7 @@ while(whoWon == ID.NULL)
 %             % ask agent for double decision
 %             agentPropose = evalDoubling(favorability,ID.AI,opponentSkill,doublingCube);
 %             if(agentPropose)
-%                 % ask usesr to accept double
+%                 % ask user to accept double
 %                 userAccept = str2num(input('Will you accept a double? (0 or 1):', 's'));
 %                 if (userAccept)
 %                     %give owner ship to user
