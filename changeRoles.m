@@ -1,4 +1,4 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Harshal Priyadarshi
 % See the License document for further information
 function boardRevert = changeRoles( board )
 % This is in accordance to the fact that the agent-2 was the best learner

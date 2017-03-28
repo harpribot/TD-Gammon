@@ -1,4 +1,4 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Harshal Priyadarshi
 % See the License document for further information
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TD gammon player - Copyrights @2015 -Harshal Priyadarshi

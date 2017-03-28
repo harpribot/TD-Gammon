@@ -1,5 +1,7 @@
+% Copyright @2017 MIT License - Author - Tim Sheppard
+% See the License document for further information
 function [evalResult] = evalDoubling( probability, playerID, opponentSkill, doublingCube )
-% probability -> float 0-1
+% probability -> float 0-1, the probability that the computer will win
 % playerID -> ID.AI or ID.USER
 % opponentSkill -> floats [percent_error,num_of_errors]
 % doublingCube -> [value,owner] 
@@ -22,7 +24,7 @@ if (opponentSkill(2) > 0)
 		errorDelta = (15.0/100);
 	end
 else
-	errorDelta = 0;
+	errorDelta = 0; % the computer should always have 0 error
 end
 
 % Set the thresholds 

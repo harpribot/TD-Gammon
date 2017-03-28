@@ -1,4 +1,4 @@
-% Copyright @2015 MIT License - Author - Garrett Kaiser
+% Copyright @2017 MIT License - Author - Garrett Kaiser
 % See the License document for further information
 function valid = MoveDirectionValid(move)
 % checks if the input vector is a valid set of moves

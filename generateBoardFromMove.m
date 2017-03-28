@@ -1,4 +1,4 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Harshal Priyadarshi
 % See the License document for further information
 function board = generateBoardFromMove(move,board,nextMoveMyMove)
 %Generate the board vector for the given move
