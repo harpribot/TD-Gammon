@@ -1,6 +1,6 @@
 % Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
 % See the License document for further information
-function [favorability] = TestRun( V_ih, V_ho, boardReadable, board, dice,userChance )
+function [favorability] = TestRun( V_ih, V_ho, boardReadable, board, dice, userChance )
 % V_ho -> weight from hidden layer to output layer
 % V_ih -> weight from input layer to hidden layer
 % boardReadable -> 2x27 board in readable form

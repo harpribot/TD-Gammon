@@ -21,7 +21,7 @@ fprintf('   AI |')
 fprintf('%4d|', boardReadable(1,:)) 
 fprintf('\n')
 
-fprintf('Human |') 
+fprintf(' User |') 
 fprintf('%4d|', boardReadable(2,:)) 
 fprintf('\n\n')
 

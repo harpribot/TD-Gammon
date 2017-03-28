@@ -9,21 +9,6 @@ whoWon = ID.NULL;
 
 %% throw in dice to decide whose first
 userTurn = randi([0,1]);
-areDiesSame = false; % make this true if you want to manually enter
-while(areDiesSame == true)
-    agentProxyDie = randi(6,[1,1]);
-    userProxyDie = str2double(input('Enter Value Please [1 to 6]: ','s'));
-    if(agentProxyDie ~= userProxyDie)
-        areDiesSame = false;
-        if(agentProxyDie > userProxyDie)
-            userTurn = 0;
-            disp('Computer Agent Goes First');
-        else
-            userTurn = 1;
-            disp('User Goes First');
-        end
-    end
-end
 
 %% initial board and game objects
 boardPresent = generateInitialBoard(userTurn);

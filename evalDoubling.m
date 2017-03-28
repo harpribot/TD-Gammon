@@ -1,9 +1,7 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
-% See the License document for further information
-function [evalResult] = evalDoubling( favorability, playerID, opponentSkill, doublingCube )
-% favorability -> 
+function [evalResult] = evalDoubling( probability, playerID, opponentSkill, doublingCube )
+% probability -> float 0-1
 % playerID -> ID.AI or ID.USER
-% opponentSkill -> 
+% opponentSkill -> floats [percent_error,num_of_errors]
 % doublingCube -> [value,owner] 
 % return a boolean 0 = false, 1 = true 
 evalResult = 0; % output 
@@ -11,10 +9,25 @@ evalResult = 0; % output
 % set things up
 cubeOwner = doublingCube{2};
 % calculate the score 
-chance = 0; 
+chance = probability; 
+if (playerID == ID.USER)
+	chance = 1 - probability; 
+end
+
+weight = 1.5; % used to weight the average error 
+% if the opponent has made errors calculate the average
+if (opponentSkill(2) > 0)
+	errorDelta = ( opponentSkill(1)/opponentSkill(2) )*weight;
+	if (errorDelta > (15.0/100)) % max error is 15percent 
+		errorDelta = (15.0/100);
+	end
+else
+	errorDelta = 0;
+end
+
 % Set the thresholds 
-proposeThres = 0;
-acceptThres = 0;
+proposeThres = (80/100.0)-errorDelta;
+acceptThres = (20/100.0)-errorDelta;
 
 
 % find out if player should propose a double

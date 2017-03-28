@@ -28,7 +28,7 @@ elseif(bearOffPossible(board,userChance) == true)
 else
     state = 2;
 end
-% start from location fartherst away from home for the moving side
+% start from location farthest away from home for the moving side
 if(userChance == 1)
     position = 24;
 else
