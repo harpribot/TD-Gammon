@@ -110,12 +110,14 @@ while(whoWon == ID.NULL)
                         end
                     end
                 end
-            else
-                % in case the user surrenders his move
+            elseif ((userMove == 0) && isempty(favorability))
+                % in case there are no moves let user surrenders his move
+                correctMoveMade = true;
                 boardPresent(193) = 1;
                 boardPresent(194) = 0;
                 userTurn = ~userTurn;
-                errorArray(end+1) = favorability(1,1);
+                % don't pentalize user error for no possible moves
+                errorArray(end+1) = 0;
                 userError = [mean(errorArray),nnz(errorArray)];
                 break;
             end
