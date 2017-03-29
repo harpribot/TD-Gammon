@@ -17,11 +17,12 @@ if (playerID == ID.USER)
 end
 
 weight = 1.5; % used to weight the average error 
+maxShift = 15.0; % max that to shift from optimal 
 % if the opponent has made errors calculate the average
 if (opponentSkill(2) > 0)
 	errorDelta = ( opponentSkill(1)/opponentSkill(2) )*weight;
-	if (errorDelta > (15.0/100)) % max error is 15percent 
-		errorDelta = (15.0/100);
+	if (errorDelta > (maxShift/100)) % max error is 15percent 
+		errorDelta = (maxShift/100);
 	end
 else
 	errorDelta = 0; % the computer should always have 0 error
