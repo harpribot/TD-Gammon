@@ -21,7 +21,6 @@ printBoard(boardReadable);
 % doubling cube object [cubeValue,cubeOwner]
 doublingCube = {1,ID.NULL};
 % Track error in plays made by user 
-% errorArray = [];
 userError = [0.0,0.0]; % [sum of error, number of suboptimal moves]
 
 %% Play Game
@@ -103,8 +102,6 @@ while(whoWon == ID.NULL)
                             disp(userMove);
                             % calculate how suboptimal the user is playing
                             if(indx ~= 1)
-                                % errorArray(end+1) = favorability(indx,1) - favorability(1,1);
-                                % userError = [mean(errorArray),nnz(errorArray)];
                                 curError = abs(favorability(indx,1) - favorability(1,1)); 
                                 if curError > 0
                                     userError = [userError(1)+curError, userError(2)+1];
@@ -115,6 +112,9 @@ while(whoWon == ID.NULL)
                             boardReadable = generateReadableBoard(boardPresent);
                         end
                     end
+                end
+                if (~correctMoveMade)
+                    disp('Invalid move!')
                 end
             end %  while(correctMoveMade == false)
         end % if (favorability(1,2) < -1)
