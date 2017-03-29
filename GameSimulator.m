@@ -101,12 +101,8 @@ while(whoWon == ID.NULL)
                             disp('Users Move:');
                             disp(userMove);
                             % calculate how suboptimal the user is playing
-                            if(indx ~= 1)
-                                curError = abs(favorability(indx,1) - favorability(1,1)); 
-                                if curError > 0
-                                    userError = [userError(1)+curError, userError(2)+1];
-                                end 
-                            end
+                            curError = abs(favorability(indx,1) - favorability(1,1)); 
+                            userError = [userError(1)+curError, userError(2)+1];
                             % update the NN, readable board and userTurn
                             boardPresent = generateBoardFromMove(userMove,boardPresent,false);
                             boardReadable = generateReadableBoard(boardPresent);
@@ -125,8 +121,8 @@ while(whoWon == ID.NULL)
         %{ 
             AIs Turn
             During training the AI that did best was in the user position,
-            therefor some extra steps are taken to use this AI to play against the user. 
-            The board must be reverted(fliped) and the move directions must be fliped
+            therefore some extra steps are taken to use this AI to play against the user. 
+            The board must be reverted(flipped) and the move directions must be flipped
         %}
         boardRevertReadable = changeRoles(boardReadable);
         boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
