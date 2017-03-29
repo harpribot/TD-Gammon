@@ -1,4 +1,5 @@
-% Copyright @2017 MIT License - Author - Garrett Kaiser & Tim Sheppard
+% Copyright @2017 MIT License
+% Author - Garrett Kaiser - Tim Sheppard
 % See the License document for further information
 function printBoard( boardReadable )
 % Print the visually readable board

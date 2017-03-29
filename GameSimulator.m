@@ -36,8 +36,8 @@ while(whoWon == ID.NULL)
     % Doubling Decision
     if(userTurn && (doublingCube{2}==ID.USER || doublingCube{2}==ID.NULL))
         % ask user for double decision
-        userPropose = str2num(input('Would you Like to double? (0 or 1):', 's'));
-        if(userPropose)
+        userPropose = input('Would you Like to double? Y/N:', 's');
+        if(strcmpi(userPropose,'Y') || strcmpi(userPropose,'Yes'))
             % ask agent to accept double
             doublingCube{2} = ID.USER; % need this so that evalDoubling knows what to calc
             agentAccept = evalDoubling(gameProbability,ID.AI,userError,doublingCube);
@@ -57,8 +57,8 @@ while(whoWon == ID.NULL)
         agentPropose = evalDoubling(gameProbability,ID.AI,userError,doublingCube);
         if(agentPropose)
             % ask user to accept double
-            userAccept = str2num(input('The AI would like to double\nWill you accept a double? (0 or 1):', 's'));
-            if (userAccept)
+            userAccept = input('The AI would like to double\nWill you accept a double? Y/N:', 's');
+            if (strcmpi(userAccept,'Y')||strcmpi(userAccept,'Yes'))
                 % double and give owner ship to user
                 doublingCube{1} = doublingCube{1}*2;
                 doublingCube{2} = ID.USER;
@@ -79,9 +79,9 @@ while(whoWon == ID.NULL)
     if(userTurn)
         % Users Turn
         favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, 1);
-        if (isempty(favorability)) % no legal moves
-            disp('User has no legal moves\n Press "enter" to continue');
-            pause;
+        if (isempty(favorability)) 
+            % no legal moves
+            disp('User has no legal moves Press "enter" to continue');pause;
             boardPresent(193) = 1;
             boardPresent(194) = 0;
         else
@@ -97,7 +97,7 @@ while(whoWon == ID.NULL)
                         % check move valid
                         if(indx ~= 0)
                             correctMoveMade = true;
-                            disp(favorability);
+                            printMoveEvaluations(favorability);
                             disp('Users Move:');
                             disp(userMove);
                             % calculate how suboptimal the user is playing
@@ -114,21 +114,28 @@ while(whoWon == ID.NULL)
                     end
                 end
                 if (~correctMoveMade)
-                    disp('Invalid move!')
+                    disp('Invalid move!');
                 end
             end %  while(correctMoveMade == false)
-        end % if (favorability(1,2) < -1)
+        end
         disp('Board State at present:');
         printBoard(boardReadable);
         userTurn = ~userTurn;
     else
-        % AIs Turn
+        %{ 
+            AIs Turn
+            During training the AI that did best was in the user position,
+            therefor some extra steps are taken to use this AI to play against the user. 
+            The board must be reverted(fliped) and the move directions must be fliped
+        %}
         boardRevertReadable = changeRoles(boardReadable);
         boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
-        % userTurn = 1 as our Agent-2 was the best learner while training
         favorability = TestRun(V_InHide, V_HideOut, boardRevertReadable, boardRevert, dice, 1);
-        disp(favorability); 
-        if (isempty(favorability)) % no legal moves
+        % printing is weird here because they are not actually the moves
+        % the AI must flip its moves as noted above
+        % printMoveEvaluations(favorability); 
+        if (isempty(favorability)) 
+            % no legal moves
             disp('AI has no legal moves');
             boardPresent(193) = 0;
             boardPresent(194) = 1;
@@ -144,7 +151,7 @@ while(whoWon == ID.NULL)
             end
             disp('AIs Move:');
             disp(bestMove);
-            % update the NN,readable board and userTurn
+            % update the NN board and readable board
             boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
             boardReadable = generateReadableBoard(boardPresent);
         end
