@@ -7,6 +7,8 @@
 close all; clear all; clc;
 
 %% Initial Setup
+% seed rand with epoch time 
+rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
 % load the learned parameters after 16k iterations
 load('bestUser16kIteration.mat');
 % throw in dice to decide whose first
@@ -21,7 +23,7 @@ printBoard(boardReadable);
 % doubling cube object [cubeValue,cubeOwner]
 doublingCube = {1,ID.NULL};
 % Track error in moves made by user
-error = []; % optimal move evaluation - choosen move evaluation
+error = []; % optimal move evaluation - chosen move evaluation
 userError = [0.0,0.0,0.0]; % [skillEvaluation, number of suboptimal moves, total moves]
 
 %% Play Game
@@ -82,7 +84,7 @@ while(whoWon == ID.NULL)
         favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, 1);
         if (isempty(favorability)) 
             % no legal moves
-            disp('User has no legal moves Press "enter" to continue');pause;
+            disp('User has no legal moves, press "enter" to continue');pause;
             boardPresent(193) = 1;
             boardPresent(194) = 0;
         else
@@ -100,7 +102,7 @@ while(whoWon == ID.NULL)
                             correctMoveMade = true;
                             fprintf('Probability Evaluations:\n');
                             printMoveEvaluations(favorability);
-                            % print user move from the evluation table
+                            % print user move from the evaluation table
                             disp('User Move');
                             printMoveEvaluations(favorability(indx,:));
                             % calculate how suboptimal the user is playing
