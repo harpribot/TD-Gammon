@@ -7,8 +7,6 @@
 close all; clear all; clc;
 
 %% Initial Setup
-% seed random with current epoch
-rng(todatenum(cdfepoch(now)));
 % load the learned parameters after 16k iterations
 load('bestUser16kIteration.mat');
 % throw in dice to decide whose first
@@ -39,7 +37,7 @@ while(whoWon == ID.NULL)
     % Doubling Decision
     if(userTurn && (doublingCube{2}==ID.USER || doublingCube{2}==ID.NULL))
         % ask user for double decision
-        userPropose = input('Would you Like to double? Y/N:', 's');
+        userPropose = input('Would you like to double? Y/N:', 's');
         if(strcmpi(userPropose,'Y') || strcmpi(userPropose,'Yes'))
             % ask agent to accept double
             doublingCube{2} = ID.USER; % need this so that evalDoubling knows what to calc
