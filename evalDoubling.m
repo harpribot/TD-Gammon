@@ -1,31 +1,35 @@
 % Copyright @2017 MIT License - Author - Tim Sheppard
 % See the License document for further information
-function [evalResult] = evalDoubling( probability, playerID, opponentSkill, doublingCube )
+function [evalResult] = evalDoubling( probability, playerID, errorTracking, doublingCube )
 % probability -> float 0-1, the probability that the computer will win
 % playerID -> ID.AI or ID.USER
-% opponentSkill -> floats [percent_error,num_of_errors]
 % doublingCube -> [value,owner] 
 % return a boolean 0 = false, 1 = true 
 evalResult = 0; % output 
 
 % set things up
 cubeOwner = doublingCube{2};
+skillEval = errorTracking(1);
+numOfErrors = errorTracking(2);
+numOfMoves = errorTracking(3);
+avgMovesInBG = 20;
 % calculate the score 
 chance = probability; 
 if (playerID == ID.USER)
 	chance = 1 - probability; 
 end
 
-weight = 1.5; % used to weight the average error 
+% used to weight the average error 
+weight = (avgMovesInBG - numOfMoves + numOfErrors)/10; 
+if (weight < 0.25)
+	weight = 0.25;
+end
+
 maxShift = 15.0; % max that to shift from optimal 
 % if the opponent has made errors calculate the average
-if (opponentSkill(2) > 0)
-	errorDelta = ( opponentSkill(1)/opponentSkill(2) )*weight;
-	if (errorDelta > (maxShift/100)) % max error is 15percent 
-		errorDelta = (maxShift/100);
-	end
-else
-	errorDelta = 0; % the computer should always have 0 error
+errorDelta = skillEval*weight;
+if (errorDelta > (maxShift/100)) % max error is 15percent 
+	errorDelta = (maxShift/100);
 end
 
 % Set the thresholds 
