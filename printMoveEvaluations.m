@@ -2,9 +2,8 @@
 % See the License document for further information
 function printMoveEvaluations(table)
 
-    fprintf('Probability Evaluations:\n');
-    fprintf('\tEval\tPossible Move\n');
-    fprintf('\t%.4f\t[%d,%d,%d,%d,%d,%d,%d,%d]\n', table.');
+    fprintf('\tEval\tMove\n');
+    fprintf('\t%.4f\t[%3d ->%3d    %3d ->%3d    %3d ->%3d    %3d ->%3d ]\n', table.');
     fprintf('\n');
 
 end

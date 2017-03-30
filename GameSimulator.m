@@ -7,6 +7,8 @@
 close all; clear all; clc;
 
 %% Initial Setup
+% seed random with current epoch
+rng(todatenum(cdfepoch(now)));
 % load the learned parameters after 16k iterations
 load('bestUser16kIteration.mat');
 % throw in dice to decide whose first
@@ -20,8 +22,9 @@ disp('Board State at present:');
 printBoard(boardReadable);
 % doubling cube object [cubeValue,cubeOwner]
 doublingCube = {1,ID.NULL};
-% Track error in plays made by user 
-userError = [0.0,0.0]; % [sum of error, number of suboptimal moves]
+% Track error in moves made by user
+error = []; % optimal move evaluation - choosen move evaluation
+userError = [0.0,0.0,0.0]; % [skillEvaluation, number of suboptimal moves, total moves]
 
 %% Play Game
 while(whoWon == ID.NULL)
@@ -97,12 +100,16 @@ while(whoWon == ID.NULL)
                         % check move valid
                         if(indx ~= 0)
                             correctMoveMade = true;
+                            fprintf('Probability Evaluations:\n');
                             printMoveEvaluations(favorability);
-                            disp('Users Move:');
-                            disp(userMove);
+                            % print user move from the evluation table
+                            disp('User Move');
+                            printMoveEvaluations(favorability(indx,:));
                             % calculate how suboptimal the user is playing
-                            curError = abs(favorability(indx,1) - favorability(1,1)); 
-                            userError = [userError(1)+curError, userError(2)+1];
+                            error(end+1) = abs(favorability(indx,1) - favorability(1,1));
+                            userError(1) = mean(error) * nnz(error)/length(error);
+                            userError(2) = nnz(error);
+                            userError(3) = length(error);
                             % update the NN, readable board and userTurn
                             boardPresent = generateBoardFromMove(userMove,boardPresent,false);
                             boardReadable = generateReadableBoard(boardPresent);
@@ -146,7 +153,7 @@ while(whoWon == ID.NULL)
                 bestMove(bestMove == 26) = -1;
             end
             disp('AIs Move:');
-            disp(bestMove);
+            printMoveEvaluations([favorability(1,1),bestMove]);
             % update the NN board and readable board
             boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
             boardReadable = generateReadableBoard(boardPresent);
