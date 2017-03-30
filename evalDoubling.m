@@ -3,6 +3,7 @@
 function [evalResult] = evalDoubling( probability, playerID, errorTracking, doublingCube )
 % probability -> float 0-1, the probability that the computer will win
 % playerID -> ID.AI or ID.USER
+% errorTracking -> floats [skillEval,numOfErrors,numOfMoves]
 % doublingCube -> [value,owner] 
 % return a boolean 0 = false, 1 = true 
 evalResult = 0; % output 
