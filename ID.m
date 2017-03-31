@@ -1,6 +1,8 @@
-classdef ID
+classdef ID < int32
     enumeration
-        AI,USER,NULL
+        NULL (-1)
+        AI (0)
+        USER (1)
     end
 end
 

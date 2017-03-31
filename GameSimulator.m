@@ -43,7 +43,7 @@ while(whoWon == ID.NULL)
         if(strcmpi(userPropose,'Y') || strcmpi(userPropose,'Yes'))
             % ask agent to accept double
             doublingCube{2} = ID.USER; % need this so that evalDoubling knows what to calc
-            agentAccept = evalDoubling(gameProbability,ID.AI,userError,doublingCube);
+            agentAccept = evalDoubling(gameProbability,ID.AI,userError,doublingCube,boardReadable);
             if (agentAccept)
                 % double and give ownership to agent
                 doublingCube{1} = doublingCube{1}*2;
@@ -57,7 +57,7 @@ while(whoWon == ID.NULL)
         end
     elseif (doublingCube{2}==ID.AI || doublingCube{2}==ID.NULL)
         % ask agent for double decision
-        agentPropose = evalDoubling(gameProbability,ID.AI,userError,doublingCube);
+        agentPropose = evalDoubling(gameProbability,ID.AI,userError,doublingCube,boardReadable);
         if(agentPropose)
             % ask user to accept double
             userAccept = input('The AI would like to double\nWill you accept a double? Y/N:', 's');

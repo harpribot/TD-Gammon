@@ -2,6 +2,7 @@
 % See the License document for further information
 function NNboard = getNNfromReadableBoard( readableBoard,userChance )
 % obtain the NN board from the readable board for testing purposes
+%   userChance - 0: agent's turn, 1: user's  turn
 
 NNboard = zeros(198,1);
 

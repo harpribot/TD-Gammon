@@ -1,6 +1,6 @@
 % Copyright @2017 MIT License - Author - Tim Sheppard
 % See the License document for further information
-function [evalResult] = evalDoubling( probability, playerID, errorTracking, doublingCube )
+function [evalResult] = evalDoubling( probability, playerID, errorTracking, doublingCube, board )
 % probability -> float 0-1, the probability that the computer will win
 % playerID -> ID.AI or ID.USER
 % errorTracking -> floats [skillEval,numOfErrors,numOfMoves]
@@ -35,7 +35,16 @@ end
 
 % Set the thresholds 
 proposeThres = (80/100.0)-errorDelta;
-acceptThres = (20/100.0)-errorDelta;
+% Check if we're late into the game 
+if (bearOffPossible(board,playerID) && ~(bearOffPossible(board,~playerID)))
+	acceptThres = (15/100.0)-errorDelta;
+elseif (bearOffPossible(board,~playerID) && ~(bearOffPossible(board,playerID)))
+	acceptThres = (75/100.0)-errorDelta;
+elseif (bearOffPossible(board,~playerID) && bearOffPossible(board,playerID))
+	acceptThres = (55/100.0)-errorDelta;
+else 
+	acceptThres = (20/100.0)-errorDelta;
+end
 
 
 % find out if player should propose a double
