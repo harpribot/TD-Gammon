@@ -8,16 +8,10 @@ function [favorability] = TestRun( V_ih, V_ho, boardReadable, board, dice, userC
 % userChance = 0 as we are simulating agent
 % dice -> the input vector of dice move 
 
-if(dice(1) == dice(2))
-	diceNew = [dice,dice];
-else
-	diceNew = dice;
-end
-
 favorability = []; 
 moveTemp = [];
 possibleMoves = [];
-possibleMoves = get_possible_moves(diceNew,boardReadable,board,moveTemp,possibleMoves,userChance);
+possibleMoves = get_possible_moves(dice,boardReadable,board,moveTemp,possibleMoves,userChance);
 
 if (size(possibleMoves) ~= 0)
 	possibleMoves = unique(possibleMoves,'rows');

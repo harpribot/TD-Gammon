@@ -10,9 +10,9 @@ function output = evaluateBoardNN(input, weight_InHide, weight_HideOut)
 hideSum = weight_InHide * [input;1];
 hide = 1./(1 + exp(-hideSum));
 
-
 % hidden to output
 outputSum = weight_HideOut * [hide;1];
 output = 1./(1 + exp(-outputSum));
+
 end
 

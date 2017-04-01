@@ -25,137 +25,129 @@
 % move       -> All possible moves for given die (k x 8 matrix)
 %               k - number of possible moves
 %               move(i,:) = [start_first,stop_first,start_second,stop_second,rest 2 moves for double]
-% userChance-> 0 --> Robot's Chance
-%              1 --> User's Chance
+% userChance -> 0 --> AI's Turn (AI we are training)
+%               1 --> Opponents Turn (temporary opponent playes bot optimal and suboptimal for training)
 % board nomenclature -> The board numbering starts from user's home. Agent
 %                       moves anticlockwise while user moves clockwise when
 %                       seen from the home side
 % 
-
+%%
+close all; clear all; clc;
+%% Initialize
+rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
 % initialize weights(V) and eligibility trace(e)
 V_InHidden  = rand(50,199)/10;
 V_HiddenOut = rand(1,51)/10;
 e_InHidden  = zeros(50,199);
 e_HiddenOut = zeros(1,51);
-alpha = 0.2;
-lambda = 0.9; % best lambda = 0.8 till now
-%discount = 1;
+% nnAI   = {V_InHidden,V_HiddenOut,e_InHidden,e_HiddenOut};
+% nnUser = {V_InHidden,V_HiddenOut,e_InHidden,e_HiddenOut};
+alpha  = 0.2;
+lambda = 0.8;
 % winner Count
 agentWins = 0;
 userWins = 0;
 
-% train through RL
-for episode = 1:20000
-    fprintf('episode # %d\n',episode);
-    % device a method to choose as to who will move first
-    areDiesSame = true;
-    
-    while(areDiesSame == true)
-        agentProxyDie = randi(6,[1,1]);
-        userProxyDie = randi(6,[1,1]);
-        if(agentProxyDie ~= userProxyDie)
-            areDiesSame = false;
-            if(agentProxyDie > userProxyDie)
-                userChance = 0;
-            else
-                userChance = 1;
-            end
-        end
-    end
+%% train through RL 
+% play against optimal opponent 2/3 of the games
+% play against suboptimal opponent 1/3 of the games
+for epoch = 1:10000
+    fprintf('episode # %d\n',epoch);
+    userChance = randi([0,1]);
     boardPresent = generateInitialBoard(userChance);
     boardReadable = generateReadableBoard(boardPresent);
     hasGameEnded = false;
-    % number of turns taken in a single game
     numTurns = 1;
-    isFirstMove = true;
+    
+%     last_V_InHidden  = V_InHidden;
+%     last_V_HiddenOut = V_HiddenOut;
+%     last_e_InHidden  = e_InHidden;
+%     last_e_HiddenOut = e_HiddenOut;
+    
     % simulate the game and run RL
     while(hasGameEnded == false)
 
         % make present board evaluation
         evalPresent = evaluateBoardNN(boardPresent,V_InHidden,V_HiddenOut);
-        % roll the die (every game starts with the die rolled to choose who will make the first move)
-        equalDiceAllowed = 6; % i.e one in 6 times
-        if(numTurns > 1)
-            dice = randi(6,[1,2]);
-            if(dice(1) == dice(2))
-                while(equalDiceAllowed > 0)
-                    dice = randi(6,[1,2]);
-                    if(dice(1) ~= dice(2))
-                        break;
-                    else
-                        equalDiceAllowed = equalDiceAllowed - 1;
-                    end
-                end
-            end
-            isFirstMove = false;
-        else
-            dice = [agentProxyDie,userProxyDie];
-        end
-        %% find all possible moves
         
-        if(dice(1) == dice(2))
-            diceNew = [dice,dice];
-        else
-            diceNew = dice;
-        end
+        % roll the die
+        dice = rollDice();
       
-        %% the possible moves generated from backgammon model
+        % the possible moves generated from backgammon model
         moveTemp = [];
         possibleMoves = [];
-        possibleMoves = get_possible_moves(diceNew,boardReadable,boardPresent,moveTemp,possibleMoves, userChance);
+        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,possibleMoves,userChance);
 
-
-        %% find the best possible move
-        nextMoveMyMove = false;
-
-        [evalNext,boardNext] = bestAction(possibleMoves,boardPresent...
-                            ,nextMoveMyMove,V_InHidden,V_HiddenOut,userChance);
-        %% Check if this is the end of the game
-        agentBorneOff = 15 * boardNext(197);
-        userBorneOff = 15 * boardNext(198);
-        [hasGameEnded,agentWins,userWins,reward] = checkGameStatus(...
-            agentBorneOff,userBorneOff,agentWins,userWins);
-
-        % Make weight update using backprop
-        if(hasGameEnded == true)
-            outputNext = reward;  % this is V0(s1)
-            outputPresent = evalPresent; % this is V0(s0)
-            [V_HiddenOut,V_InHidden,e_HiddenOut,e_InHidden] = ...
-                BackPropogation(V_HiddenOut,V_InHidden,...
-                                e_HiddenOut,e_InHidden,reward,...
-                                outputNext,outputPresent,...
-                                alpha,lambda,boardNext);
-        elseif(isFirstMove == false)
-            outputNext = evalNext;  % this is V0(s1)
-            outputPresent = evalPresent; % this is V0(s0)
-            [V_HiddenOut,V_InHidden,e_HiddenOut,e_InHidden] = ...
-                BackPropogation(V_HiddenOut,V_InHidden,...
-                                e_HiddenOut,e_InHidden,reward,...
-                                outputNext,outputPresent,...
-                                alpha,lambda,boardNext);
+        % make a move
+        if((mod(epoch,3)==2) && userChance)
+            % 1/3 of games the opponent will choose random moves
+            [evalNext,boardNext] = randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
+        else
+            % use optimal move
+            [evalNext,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
         end
         
-        %% update the board and give the chance to the opponent
+        % Check if this is the end of the game
+        reward = 0;
         boardPresent = boardNext;
         boardReadable = generateReadableBoard(boardPresent);
-
-        if(userChance == 0)
-            userChance = 1;
-        else
-            userChance = 0;
+        if(boardReadable(2,2) == 15)
+            hasGameEnded = true;
+            userWins = userWins + 1;
+            reward = 0;
+        elseif(boardReadable(1,27) == 15)
+            hasGameEnded = true;
+            agentWins = agentWins + 1;
+            reward = 1;
         end
+
+        % Make weight update using backprop
+%         if(~userChance)
+            if(hasGameEnded)
+                outputNext    = reward;
+                outputPresent = evalPresent;
+            else
+                outputNext    = evalNext;
+                outputPresent = evalPresent;
+            end
+            [V_HiddenOut,V_InHidden,e_HiddenOut,e_InHidden] = ...
+            BackPropogation(V_HiddenOut,...
+                            V_InHidden,...
+                            e_HiddenOut,...
+                            e_InHidden,...
+                            outputNext,...
+                            outputPresent,...
+                            alpha,lambda,...
+                            boardNext);
+%         end
+        
+        % next turn
+        userChance = ~userChance;
         numTurns = numTurns + 1;
+        
+        if(numTurns > 150)
+            % bad game occured set data back for next game
+            fprintf('Bad Game! Errors\n');
+%             V_InHidden  = last_V_InHidden;
+%             V_HiddenOut = last_V_HiddenOut;
+%             e_InHidden  = last_e_InHidden;
+%             e_HiddenOut = last_e_HiddenOut;
+            break;
+        end
+        
     end
+    
     fprintf('Agent/User = [%d, %d]\n', agentWins,userWins);
-    %% save the data against system shutdown
-    if(mod(episode,500)== 1)
+    % save the data against system shutdown
+    if(mod(epoch,500)== 1)
         dlmwrite('VinHide.mat',V_InHidden,'delimiter',' ','precision','%10.6g');
         dlmwrite('VhideOut.mat',V_HiddenOut,'delimiter',' ','precision','%10.6g');
         dlmwrite('eInHide.mat',e_InHidden,'delimiter',' ','precision','%10.6g');
         dlmwrite('eHideOut.mat',e_HiddenOut,'delimiter',' ','precision','%10.6g');
         dlmwrite('agentUser.mat',[agentWins,userWins],'delimiter',' ','precision','%10.6g');
     end
+    
 end
 
-%end
+
 
