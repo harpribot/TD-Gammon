@@ -81,7 +81,7 @@ while(whoWon == ID.NULL)
     % Move Decision
     if(userTurn)
         % Users Turn
-        favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, 1);
+        favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, userTurn);
         if (isempty(favorability)) 
             % no legal moves
             disp('User has no legal moves, press "enter" to continue');pause;
@@ -133,7 +133,7 @@ while(whoWon == ID.NULL)
         %}
         boardRevertReadable = changeRoles(boardReadable);
         boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
-        favorability = TestRun(V_InHide, V_HideOut, boardRevertReadable, boardRevert, dice, 1);
+        favorability = TestRun(V_InHide, V_HideOut, boardRevertReadable, boardRevert, dice, userTurn);
         % printing is weird here because they are not actually the moves
         % the AI must flip its moves as noted above
         % printMoveEvaluations(favorability); 
@@ -145,13 +145,13 @@ while(whoWon == ID.NULL)
         else
             bestMoveTemp = favorability(1,2:end);
             bestMove = bestMoveTemp;
-            for i = [1,3,5,7]
-                if(bestMoveTemp(i + 1) ~= 0 || bestMoveTemp(i) ~= 0)
-                    bestMove(i) = 25 - bestMoveTemp(i);
-                    bestMove(i + 1) = 25 - bestMoveTemp(i + 1);
-                end
-                bestMove(bestMove == 26) = -1;
-            end
+%             for i = [1,3,5,7]
+%                 if(bestMoveTemp(i + 1) ~= 0 || bestMoveTemp(i) ~= 0)
+%                     bestMove(i) = 25 - bestMoveTemp(i);
+%                     bestMove(i + 1) = 25 - bestMoveTemp(i + 1);
+%                 end
+%                 bestMove(bestMove == 26) = -1;
+%             end
             disp('AIs Move:');
             printMoveEvaluations([favorability(1,1),bestMove]);
             % update the NN board and readable board

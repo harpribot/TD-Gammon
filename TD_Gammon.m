@@ -59,11 +59,6 @@ for epoch = 1:10000
     hasGameEnded = false;
     numTurns = 1;
     
-%     last_V_InHidden  = V_InHidden;
-%     last_V_HiddenOut = V_HiddenOut;
-%     last_e_InHidden  = e_InHidden;
-%     last_e_HiddenOut = e_HiddenOut;
-    
     % simulate the game and run RL
     while(hasGameEnded == false)
 
@@ -81,7 +76,14 @@ for epoch = 1:10000
         % make a move
         if((mod(epoch,3)==2) && userChance)
             % 1/3 of games the opponent will choose random moves
-            [evalNext,boardNext] = randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
+            if((mod(epoch,6)==2))
+                randomIndex = randi(size(possibleMoves,1));
+                move = possibleMoves(randomIndex,:);
+                boardNext = generateBoardFromMove(move,boardPresent,false);
+                evalNext = evaluateBoardNN(boardNext,V_InHidden,V_HiddenOut);
+            else
+                [evalNext,boardNext] = randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
+            end
         else
             % use optimal move
             [evalNext,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
@@ -125,15 +127,9 @@ for epoch = 1:10000
         userChance = ~userChance;
         numTurns = numTurns + 1;
         
-        if(numTurns > 150)
-            % bad game occured set data back for next game
-            fprintf('Bad Game! Errors\n');
-%             V_InHidden  = last_V_InHidden;
-%             V_HiddenOut = last_V_HiddenOut;
-%             e_InHidden  = last_e_InHidden;
-%             e_HiddenOut = last_e_HiddenOut;
-            break;
-        end
+%         disp('Board State at present:');
+%         printBoard(boardReadable);
+%         disp('press "enter" to continue');pause;
         
     end
     

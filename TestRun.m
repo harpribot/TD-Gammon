@@ -19,15 +19,10 @@ if (size(possibleMoves) ~= 0)
 	favorability(:,2:size(possibleMoves,2) + 1) = possibleMoves;
 	for i = 1:size(possibleMoves,1)
 		boardTemp = generateBoardFromMove(possibleMoves(i,:),board,false);
-		evalVal = evaluateBoardNN(boardTemp,V_ih,V_ho);
-		favorability(i,1) = evalVal;
-	end
-	% sort the content
-	if(userChance == 1)
-		favorability = sortrows(favorability,1); % sorts in ascending order
-	else
-		favorability = sortrows(favorability,-1);% sorts in descending order
-	end
+		tempEvalVal = evaluateBoardNN(boardTemp,V_ih,V_ho);
+		favorability(i,1) = tempEvalVal;
+    end
+    favorability = sortrows(favorability,-1);
 end
 
 end % function
