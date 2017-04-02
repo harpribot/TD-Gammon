@@ -8,7 +8,7 @@ function [favorability] = TestRun( V_ih, V_ho, boardReadable, board, dice, userC
 % userChance = 0 as we are simulating agent
 % dice -> the input vector of dice move 
 
-favorability = []; 
+favorability = [];
 moveTemp = [];
 possibleMoves = [];
 possibleMoves = get_possible_moves(dice,boardReadable,board,moveTemp,possibleMoves,userChance);
@@ -22,7 +22,11 @@ if (size(possibleMoves) ~= 0)
 		tempEvalVal = evaluateBoardNN(boardTemp,V_ih,V_ho);
 		favorability(i,1) = tempEvalVal;
     end
-    favorability = sortrows(favorability,-1);
+    if(~userChance)
+        favorability = sortrows(favorability,-1);
+    else
+        favorability = sortrows(favorability,1);
+    end
 end
 
 end % function

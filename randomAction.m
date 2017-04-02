@@ -1,5 +1,7 @@
-% Copyright @2017 MIT License Author - Harshal Priyadarshi
+% Copyright @2017 MIT License
 % See the License document for further information
+% Author - Harshal Priyadarshi
+% Revised - Garrett Kaiser 4/2/2017
 function [eval,boardNext] = randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance)
 
     if(size(possibleMoves) ~= 0) 
@@ -11,7 +13,11 @@ function [eval,boardNext] = randomAction(possibleMoves,boardPresent,V_InHidden,V
             tempEvalVal = evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut);
             favorability(i,1) = tempEvalVal;
         end
-        favorability = sortrows(favorability,-1);
+        if(~userChance)
+            favorability = sortrows(favorability,-1);
+        else
+            favorability = sortrows(favorability,1);
+        end
         
         maxIndex = 8;
         if(size(favorability,1) < maxIndex)
