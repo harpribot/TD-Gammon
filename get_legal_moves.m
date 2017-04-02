@@ -49,7 +49,7 @@ elseif (bearOffPossible(board,player))
 	if(isempty(legal_moves)) 
 		for i = (die - 1):-1:1
 			moveStart = abs(home - i);
-			if(board(2,moveStart + 2) > 0)
+			if(board(id,moveStart + 2) > 0)
 				legal_moves = [moveStart, home];
 				break;
 			end % if 
