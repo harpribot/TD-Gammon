@@ -49,7 +49,8 @@ agentWins = 0;
 userWins = 0;
 
 %% train through RL 
-for epoch = 1:120000
+MAX_TRAIN = 300; 
+for epoch = 1:MAX_TRAIN
     fprintf('episode # %d\n',epoch);
     userChance = randi([0,1]);
     boardPresent = generateInitialBoard(userChance);
@@ -69,15 +70,14 @@ for epoch = 1:120000
         % the possible moves generated from backgammon model
         moveTemp = [];
         possibleMoves = [];
-        possibleMoves = ...
-          get_possible_moves(dice,boardReadable,boardPresent,moveTemp,possibleMoves,userChance);
+        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,possibleMoves,userChance);
 
         % choose move
         %if((mod(epoch,3)==2) && userChance)
-        if(userChance && evalStart <= 0.45)
+        if(userChance && evalStart <= 0.45 && ~isempty(possibleMoves))
             %if((mod(epoch,6)==2))
             if(evalStart <= 0.30)
-                % copmletely random
+                % completely random
                 randomIndex = randi(size(possibleMoves,1));
                 move = possibleMoves(randomIndex,:);
                 boardNext = generateBoardFromMove(move,boardPresent,false);
@@ -133,11 +133,26 @@ for epoch = 1:120000
         
         % next turn
         userChance = ~userChance;
+        % if ( (mod(numTurns,50) == 0) )
+        %     fprintf('Number of turns: %d time: %s \n', numTurns, datestr(now,'HH:MM:SS PM'));
+        % end
         numTurns = numTurns + 1;
     end
     
-    fprintf('Agent/User = [%d, %d]\n', agentWins,userWins);
-    % save the data against system shutdown
+    fprintf('Agent/User = [%d, %d]  (Total turns = %d)\n', agentWins,userWins,numTurns);
+    
+    % save the data every 1000 or at the end to play against 
+    if ( (mod(epoch,1000) == 0) || (epoch == MAX_TRAIN) )
+        filename = 'trained_weights';
+        wins_AI_User = [agentWins,userWins];
+        epochs_trained = epoch;
+        date_trained = datetime;
+        V_InHide  = V_InHidden;
+        V_HideOut = V_HiddenOut;
+        e_InHide  = e_InHidden;
+        e_HideOut = e_HiddenOut;
+        save(filename, 'wins_AI_User', 'date_trained', 'epochs_trained', 'V_InHide' , 'V_HideOut', 'e_InHide', 'e_HideOut');
+    end
     
 end
 

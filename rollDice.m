@@ -3,7 +3,8 @@
 function dice = rollDice()
 
     equalDiceAllowed = 6;
-    dice = randi(6,[1,2]);
+    dice(1) = randi(6);
+    dice(2) = randi(6);
     if(dice(1) == dice(2))
         while(equalDiceAllowed > 0)
             dice = randi(6,[1,2]);

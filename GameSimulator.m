@@ -9,8 +9,9 @@ close all; clear all; clc;
 %% Initial Setup
 % seed rand with epoch time 
 rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
-% load the learned parameters after 16k iterations
-load('bestUser16kIteration.mat');
+% load the learned parameters 
+load('trained_weights.mat');
+fprintf('Weights after %d iterations \nTrained on %s \n\n',epochs_trained, datestr(date_trained));
 % throw in dice to decide whose first
 userTurn = randi([0,1]);
 whoWon = ID.NULL;
@@ -131,9 +132,9 @@ while(whoWon == ID.NULL)
             therefore some extra steps are taken to use this AI to play against the user. 
             The board must be reverted(flipped) and the move directions must be flipped
         %}
-        boardRevertReadable = changeRoles(boardReadable);
-        boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
-        favorability = TestRun(V_InHide, V_HideOut, boardRevertReadable, boardRevert, dice, userTurn);
+        % boardRevertReadable = changeRoles(boardReadable);
+        % boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
+        favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, userTurn);
         % printing is weird here because they are not actually the moves
         % the AI must flip its moves as noted above
         % printMoveEvaluations(favorability); 
@@ -153,7 +154,8 @@ while(whoWon == ID.NULL)
 %                 bestMove(bestMove == 26) = -1;
 %             end
             disp('AIs Move:');
-            printMoveEvaluations([favorability(1,1),bestMove]);
+            printMoveEvaluations([favorability]);
+            % printMoveEvaluations([favorability(1,1),bestMove]);
             % update the NN board and readable board
             boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
             boardReadable = generateReadableBoard(boardPresent);
