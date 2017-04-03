@@ -1,7 +1,7 @@
 % Copyright @2017 MIT License
 % See the License document for further information
 % Author - Harshal Priyadarshi
-% Revised - Garrett Kaiser 4/2/2017
+% Revised - Garrett Kaiser & Tim Sheppard 4/2/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TD gammon player
 
@@ -50,6 +50,7 @@ userWins = 0;
 
 %% train through RL 
 MAX_TRAIN = 120000;
+MIN_TRAIN = 60000;
 for epoch = 1:MAX_TRAIN
     fprintf('Game # %d\n',epoch);
     userChance = randi([0,1]);
@@ -58,6 +59,11 @@ for epoch = 1:MAX_TRAIN
     hasGameEnded = false;
     numTurns = 1;
     evalStart = evaluateBoardNN(boardPresent,V_InHidden,V_HiddenOut);
+		
+	if (epoch >= MIN_TRAIN && round(evalStart,1) == 0.5) 
+		break;
+	end
+    
     
     % simulate the game and run RL
     while(hasGameEnded == false)
@@ -142,7 +148,7 @@ for epoch = 1:MAX_TRAIN
     fprintf('Agent/User = [%d, %d]  (Total turns = %d)\n', agentWins,userWins,numTurns);
     
     % save the data every 1000 or at the end to play against 
-    if ( (mod(epoch,1000) == 0) || (epoch == MAX_TRAIN) )
+    if (mod(epoch,1000) == 0)
         filename = 'trained_weights';
         wins_AI_User = [agentWins,userWins];
         epochs_trained = epoch;
@@ -152,9 +158,17 @@ for epoch = 1:MAX_TRAIN
         e_InHide  = e_InHidden;
         e_HideOut = e_HiddenOut;
         save(filename, 'wins_AI_User', 'date_trained', 'epochs_trained', 'V_InHide' , 'V_HideOut', 'e_InHide', 'e_HideOut');
-    end
-    
+	end
+
 end
 
-
-
+%% Save Trained data
+filename = 'trained_weights';
+wins_AI_User = [agentWins,userWins];
+epochs_trained = epoch;
+date_trained = datetime;
+V_InHide  = V_InHidden;
+V_HideOut = V_HiddenOut;
+e_InHide  = e_InHidden;
+e_HideOut = e_HiddenOut;
+save(filename, 'wins_AI_User', 'date_trained', 'epochs_trained', 'V_InHide' , 'V_HideOut', 'e_InHide', 'e_HideOut');
