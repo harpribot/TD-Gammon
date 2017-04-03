@@ -49,9 +49,9 @@ agentWins = 0;
 userWins = 0;
 
 %% train through RL 
-MAX_TRAIN = 300; 
+MAX_TRAIN = 120000;
 for epoch = 1:MAX_TRAIN
-    fprintf('episode # %d\n',epoch);
+    fprintf('Game # %d\n',epoch);
     userChance = randi([0,1]);
     boardPresent = generateInitialBoard(userChance);
     boardReadable = generateReadableBoard(boardPresent);

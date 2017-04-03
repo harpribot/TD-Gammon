@@ -102,10 +102,10 @@ while(whoWon == ID.NULL)
                         if(indx ~= 0)
                             correctMoveMade = true;
                             fprintf('Probability Evaluations:\n');
-                            printMoveEvaluations(favorability);
+                            printMoveEvaluations(favorability,userTurn);
                             % print user move from the evaluation table
                             disp('User Move');
-                            printMoveEvaluations(favorability(indx,:));
+                            printMoveEvaluations(favorability(indx,:),userTurn);
                             % calculate how suboptimal the user is playing
                             error(end+1) = abs(favorability(indx,1) - favorability(1,1));
                             userError(1) = mean(error) * nnz(error)/length(error);
@@ -128,34 +128,18 @@ while(whoWon == ID.NULL)
     else
         %{ 
             AIs Turn
-            During training the AI that did best was in the user position,
-            therefore some extra steps are taken to use this AI to play against the user. 
-            The board must be reverted(flipped) and the move directions must be flipped
         %}
-        % boardRevertReadable = changeRoles(boardReadable);
-        % boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
         favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, userTurn);
-        % printing is weird here because they are not actually the moves
-        % the AI must flip its moves as noted above
-        % printMoveEvaluations(favorability); 
         if (isempty(favorability)) 
             % no legal moves
             disp('AI has no legal moves');
             boardPresent(193) = 0;
             boardPresent(194) = 1;
-        else
-            bestMoveTemp = favorability(1,2:end);
-            bestMove = bestMoveTemp;
-%             for i = [1,3,5,7]
-%                 if(bestMoveTemp(i + 1) ~= 0 || bestMoveTemp(i) ~= 0)
-%                     bestMove(i) = 25 - bestMoveTemp(i);
-%                     bestMove(i + 1) = 25 - bestMoveTemp(i + 1);
-%                 end
-%                 bestMove(bestMove == 26) = -1;
-%             end
+		else
+            bestMove = favorability(1,2:end);
             disp('AIs Move:');
-            printMoveEvaluations([favorability]);
-            % printMoveEvaluations([favorability(1,1),bestMove]);
+            % printMoveEvaluations(favorability,userTurn);
+            printMoveEvaluations([favorability(1,1),bestMove],userTurn);
             % update the NN board and readable board
             boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
             boardReadable = generateReadableBoard(boardPresent);
