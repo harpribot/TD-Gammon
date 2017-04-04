@@ -33,8 +33,10 @@
 %                       moves anticlockwise while user moves clockwise when
 %                       seen from the home side
 % 
-%%
+
+%% Clean Up
 close all; clear all; clc;
+
 %% Initialize
 rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
 % initialize weights(V) and eligibility trace(e)
@@ -49,8 +51,10 @@ agentWins = 0;
 userWins = 0;
 
 %% train through RL 
-MAX_TRAIN = 120000;
-MIN_TRAIN = 60000;
+MAX_TRAIN = 900000;
+MIN_TRAIN = 100000;
+min_start_goal = 0.49;
+max_start_goal = 0.51;
 for epoch = 1:MAX_TRAIN
     fprintf('Game # %d\n',epoch);
     userChance = randi([0,1]);
@@ -59,11 +63,26 @@ for epoch = 1:MAX_TRAIN
     hasGameEnded = false;
     numTurns = 1;
     evalStart = evaluateBoardNN(boardPresent,V_InHidden,V_HiddenOut);
-		
-	if (epoch >= MIN_TRAIN && round(evalStart,1) == 0.5) 
-		break;
-	end
+    evalOther = evaluateBoardNN(generateInitialBoard(~userChance),V_InHidden,V_HiddenOut);
     
+    % Check if the starting value is what we want, if so end training
+    if ( evalStart > min_start_goal && evalStart < max_start_goal...
+        && evalOther > min_start_goal && evalOther < max_start_goal ) 
+        if  (epoch >= MIN_TRAIN )
+            break;
+        else
+            % save the data if it is decent
+            filename = 'trained_weights';
+            wins_AI_User = [agentWins,userWins];
+            epochs_trained = epoch;
+            date_trained = datetime;
+            V_InHide  = V_InHidden;
+            V_HideOut = V_HiddenOut;
+            e_InHide  = e_InHidden;
+            e_HideOut = e_HiddenOut;
+            save(filename, 'wins_AI_User', 'date_trained', 'epochs_trained', 'V_InHide' , 'V_HideOut', 'e_InHide', 'e_HideOut');
+        end
+    end
     
     % simulate the game and run RL
     while(hasGameEnded == false)
@@ -75,8 +94,7 @@ for epoch = 1:MAX_TRAIN
       
         % the possible moves generated from backgammon model
         moveTemp = [];
-        possibleMoves = [];
-        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,possibleMoves,userChance);
+        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,userChance);
 
         % choose move
         %if((mod(epoch,3)==2) && userChance)
@@ -139,27 +157,10 @@ for epoch = 1:MAX_TRAIN
         
         % next turn
         userChance = ~userChance;
-        % if ( (mod(numTurns,50) == 0) )
-        %     fprintf('Number of turns: %d time: %s \n', numTurns, datestr(now,'HH:MM:SS PM'));
-        % end
         numTurns = numTurns + 1;
     end
     
-    fprintf('Agent/User = [%d, %d]  (Total turns = %d)\n', agentWins,userWins,numTurns);
-    
-    % save the data every 1000 or at the end to play against 
-    if (mod(epoch,1000) == 0)
-        filename = 'trained_weights';
-        wins_AI_User = [agentWins,userWins];
-        epochs_trained = epoch;
-        date_trained = datetime;
-        V_InHide  = V_InHidden;
-        V_HideOut = V_HiddenOut;
-        e_InHide  = e_InHidden;
-        e_HideOut = e_HiddenOut;
-        save(filename, 'wins_AI_User', 'date_trained', 'epochs_trained', 'V_InHide' , 'V_HideOut', 'e_InHide', 'e_HideOut');
-	end
-
+    fprintf('Agent/User = [%d, %d] \t(Total turns = %d)\n', agentWins,userWins,numTurns);
 end
 
 %% Save Trained data

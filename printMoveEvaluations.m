@@ -7,6 +7,9 @@ function printMoveEvaluations(table, player)
 	if (player)
 		table(:,1) = 1-table(:,1);
 	end
+	if (size(table,1) > 20) 
+		table = table(1:20,:);
+	end
     fprintf('\tEval\tMove\n');
     fprintf('\t%.4f\t[%3d ->%3d    %3d ->%3d    %3d ->%3d    %3d ->%3d ]\n', table.');
     fprintf('\n');

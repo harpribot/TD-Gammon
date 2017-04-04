@@ -11,7 +11,7 @@ function [favorability] = TestRun( V_ih, V_ho, boardReadable, board, dice, userC
 favorability = [];
 moveTemp = [];
 possibleMoves = [];
-possibleMoves = get_possible_moves(dice,boardReadable,board,moveTemp,possibleMoves,userChance);
+possibleMoves = get_possible_moves(dice,boardReadable,board,moveTemp,userChance);
 
 if (size(possibleMoves) ~= 0)
 	possibleMoves = unique(possibleMoves,'rows');
