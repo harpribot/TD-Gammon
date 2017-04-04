@@ -18,7 +18,7 @@ move = reshape(move,[2,4])';
 % check as to whose move
 if(board(193)==1)
     % present move is for the agent
-    userChance = 0;
+    player = 0;
     if(nextMoveMyMove == false)
         % make the next board user's chance
         board(193) = 0;
@@ -26,7 +26,7 @@ if(board(193)==1)
     end
 else
     % present move is for the user
-    userChance = 1;
+    player = 1;
     if(nextMoveMyMove == false)
         % make the next board agent's chance
         board(193) = 1;
@@ -41,7 +41,7 @@ for dice = 1:size(move,1)
     if(startPosition == 0 && endPosition == 0)
         break;
     end
-    if(userChance == 0)
+    if(player == 0)
         if(startPosition ~= -1)% the checker is not on bar
             startFirstNeuron = (startPosition - 1) * 8 + 1;
             startLastNeuron  = (startPosition - 1) * 8 + 4;
@@ -157,4 +157,3 @@ board(196) = 0.5 * userOnBar;
 board(197) = agentBorneOff/15;
 board(198) = userBorneOff/15;
 end
-

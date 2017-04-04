@@ -4,7 +4,7 @@
 % Backgammon Game Simulation for TD-Gammon
 
 %% Clean up
-close all; clear all; clc;
+close all; clear variables; clearvars; clc;
 
 %% Initial Setup
 % seed rand with epoch time 
@@ -13,7 +13,12 @@ rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
 load('trained_weights.mat');
 fprintf('Weights after %d iterations \nTrained on %s \n\n',epochs_trained, datestr(date_trained));
 % throw in dice to decide whose first
-userTurn = randi([0,1]);
+dice = [0,0];
+while (dice(1) == dice(2))
+    dice = rollDice();
+    userTurn = (dice(2) > dice(1));
+end
+firstTurn = true;
 whoWon = ID.NULL;
 % initial board
 boardPresent = generateInitialBoard(userTurn);
@@ -52,7 +57,7 @@ while(whoWon == ID.NULL)
                 disp('AI has accepted the doubling');
             else
                 whoWon = ID.USER; 
-                fprintf('AI has declined the doubling\n User Wins!\n');
+                fprintf('AI has declined the doubling\n User Wins.  Match value was %d.\n\n', doublingCube{1});
                 break; 
             end
         end
@@ -68,14 +73,16 @@ while(whoWon == ID.NULL)
                 doublingCube{2} = ID.USER;
             else
                 whoWon = ID.AI; 
-                fprintf('Double declined\n Agent Won.\n');
+                fprintf('Double declined\n Agent Wins. Match value was %d.\n\n', doublingCube{1});
                 break;
             end
         end
     end
     
     % New Roll
-    dice = rollDice();
+    if (~firstTurn)
+        dice = rollDice();
+    end
     disp('Dice Throw:');
     disp(dice);
     
@@ -122,9 +129,6 @@ while(whoWon == ID.NULL)
                 end
             end %  while(correctMoveMade == false)
         end
-        disp('Board State at present:');
-        printBoard(boardReadable);
-        userTurn = ~userTurn;
     else
         %{ 
             AIs Turn
@@ -135,7 +139,7 @@ while(whoWon == ID.NULL)
             disp('AI has no legal moves');
             boardPresent(193) = 0;
             boardPresent(194) = 1;
-		else
+        else
             bestMove = favorability(1,2:end);
             disp('AIs Move:');
             % printMoveEvaluations(favorability,userTurn);
@@ -144,21 +148,19 @@ while(whoWon == ID.NULL)
             boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
             boardReadable = generateReadableBoard(boardPresent);
         end
-        disp('Board State at present:');
-        printBoard(boardReadable);
-        userTurn = ~userTurn; 
     end
+    disp('Board State at present:');
+    printBoard(boardReadable);
+    userTurn = ~userTurn; 
+    firstTurn = false;
 
     % check if game has ended
     if(boardReadable(2,2) == 15)
         whoWon = ID.USER; 
-        disp('User Won');
+        fprintf('User Wins.  Match value was %d.\n\n', doublingCube{1});
     elseif(boardReadable(1,27) == 15)
         whoWon = ID.AI; 
-        disp('Agent Won');  
+        fprintf('Agent Wins. Match value was %d.\n\n', doublingCube{1});
     end
          
 end 
-
-disp('End of script');
-%% End of script

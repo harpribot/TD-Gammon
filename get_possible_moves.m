@@ -38,9 +38,9 @@ for diePtr = 1:size(dice,2)
 end
 
 % End of movement branch
-if (isempty(legalMoves) && ~isempty(move))
+if (isempty(legalMoves) && ~isempty(move) && isempty(possibleMoves))
 	% Pad all remaining moves with zeros to match expected size
-	if(size(move,2) ~= 8 && ~isempty(move))
+	if(size(move,2) ~= 8)
 		move = [move,zeros(1,8 - size(move,2))];
 	end
 	possibleMoves = move; % return

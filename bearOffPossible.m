@@ -1,9 +1,9 @@
 % Copyright @2017 MIT License Author - Harshal Priyadarshi
 % See the License document for further information
-function condition = bearOffPossible( board,userChance )
+function condition = bearOffPossible(board,player)
 % board --> the readable board
 condition = false;
-if(userChance == 1)
+if(player == 1)
     totalCheckersInHome = 0;
     for i = 6:-1:0
         totalCheckersInHome = totalCheckersInHome + board(2,i + 2);
@@ -23,4 +23,3 @@ end
 
 
 end
-

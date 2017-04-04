@@ -22,7 +22,7 @@ traj  = playerTraj(id);  % trajectory of moves
 
 %% Find legal moves
 % Checker(s) on the bar
-if (board(player + 1,1) > 0) 
+if (board(id,1) > 0) 
 	moveStart = -1;
 	moveEnd = abs(start - die);
 	if(board(nid, moveEnd + 2) < 2)

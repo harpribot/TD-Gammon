@@ -2,7 +2,7 @@
 % See the License document for further information
 % Author - Harshal Priyadarshi
 % Revised - Garrett Kaiser 4/2/2017
-function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance)
+function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,player)
 
     if(size(possibleMoves) ~= 0)                        
         possibleMoves = unique(possibleMoves,'rows');
@@ -13,7 +13,7 @@ function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_H
             tempEvalVal = evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut);
             favorability(i,1) = tempEvalVal;
         end
-        if(~userChance)
+        if(~player)
             favorability = sortrows(favorability,-1);
         else
             favorability = sortrows(favorability,1);
@@ -24,7 +24,7 @@ function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_H
         boardNext = generateBoardFromMove(move,boardPresent,false);
     else
         boardNext = boardPresent;
-        if(userChance)
+        if(player)
             boardNext(193) = 1;
             boardNext(194) = 0;
         else
@@ -34,5 +34,4 @@ function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_H
         eval = evaluateBoardNN(boardNext,V_InHidden,V_HiddenOut);
     end
 
-end
-
+end % function

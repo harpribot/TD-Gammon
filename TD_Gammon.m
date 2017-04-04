@@ -1,7 +1,7 @@
 % Copyright @2017 MIT License
 % See the License document for further information
 % Author - Harshal Priyadarshi
-% Revised - Garrett Kaiser & Tim Sheppard 4/2/2017
+% Revised - Garrett Kaiser & Tim Sheppard 4/4/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TD gammon player
 
@@ -27,7 +27,7 @@
 %               k - number of possible moves
 %               move(i,:) = 
 %                   [start_first,stop_first,start_second,stop_second,rest 2 moves for double]
-% userChance -> 0 --> AI's Turn (AI we are training)
+% userTurn -> 0 --> AI's Turn (AI we are training)
 %               1 --> Opponents Turn
 % board nomenclature -> The board numbering starts from user's home. Agent
 %                       moves anticlockwise while user moves clockwise when
@@ -53,21 +53,30 @@ userWins = 0;
 %% train through RL 
 MAX_TRAIN = 900000;
 MIN_TRAIN = 100000;
+% Initial probability goal
 min_start_goal = 0.49;
 max_start_goal = 0.51;
 for epoch = 1:MAX_TRAIN
     fprintf('Game # %d\n',epoch);
-    userChance = randi([0,1]);
-    boardPresent = generateInitialBoard(userChance);
+    % roll dice to choose first player
+    dice = [0,0];
+    while (dice(1) == dice(2))
+        dice = rollDice();
+        userTurn = (dice(2) > dice(1));
+    end
+    firstTurn = true;
+    boardPresent = generateInitialBoard(userTurn);
     boardReadable = generateReadableBoard(boardPresent);
     hasGameEnded = false;
     numTurns = 1;
-    evalStart = evaluateBoardNN(boardPresent,V_InHidden,V_HiddenOut);
-    evalOther = evaluateBoardNN(generateInitialBoard(~userChance),V_InHidden,V_HiddenOut);
+    
+    % Check initial probability for AI and User
+    evalAI   = evaluateBoardNN(generateInitialBoard(0),V_InHidden,V_HiddenOut);
+    evalUser = evaluateBoardNN(generateInitialBoard(1),V_InHidden,V_HiddenOut);
     
     % Check if the starting value is what we want, if so end training
-    if ( evalStart > min_start_goal && evalStart < max_start_goal...
-        && evalOther > min_start_goal && evalOther < max_start_goal ) 
+    if ( evalAI > min_start_goal && evalAI < max_start_goal...
+        && evalUser > min_start_goal && evalUser < max_start_goal ) 
         if  (epoch >= MIN_TRAIN )
             break;
         else
@@ -90,17 +99,19 @@ for epoch = 1:MAX_TRAIN
         evalPresent = evaluateBoardNN(boardPresent,V_InHidden,V_HiddenOut);
         
         % roll the die
-        dice = rollDice();
+        if (~firstTurn)
+            dice = rollDice();
+        end
       
         % the possible moves generated from backgammon model
         moveTemp = [];
-        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,userChance);
+        possibleMoves = get_possible_moves(dice,boardReadable,boardPresent,moveTemp,userTurn);
 
         % choose move
-        %if((mod(epoch,3)==2) && userChance)
-        if(userChance && evalStart <= 0.45 && ~isempty(possibleMoves))
+        %if((mod(epoch,3)==2) && userTurn)
+        if(userTurn && evalAI <= 0.45 && ~isempty(possibleMoves))
             %if((mod(epoch,6)==2))
-            if(evalStart <= 0.30)
+            if(evalAI <= 0.30)
                 % completely random
                 randomIndex = randi(size(possibleMoves,1));
                 move = possibleMoves(randomIndex,:);
@@ -109,12 +120,12 @@ for epoch = 1:MAX_TRAIN
             else
                 % random action from top portion of evaluations
                 [evalNext,boardNext] = ...
-                    randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
+                    randomAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userTurn);
             end
         else
             % optimal move
             [evalNext,boardNext] = ...
-                bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userChance);
+                bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,userTurn);
         end
         
         % Check if this is the end of the game
@@ -156,7 +167,8 @@ for epoch = 1:MAX_TRAIN
         end
         
         % next turn
-        userChance = ~userChance;
+        firstTurn = false;
+        userTurn = ~userTurn;
         numTurns = numTurns + 1;
     end
     
