@@ -10,6 +10,7 @@ function decision = GetDoublingDecision(B1,B2,B3,P,foesError,cubeValue)
 %        You are always moving your pieces towards square 24
 %        Your opponent will always be moving towards square 1
 % B1 -> 1(you offer a double to opponent) or 0( you are being doubled)
+% B2 -> 1(your opponent has the cube) or 0(your opponent does not have the cube)
     % minimum number of args = 4
     if(nargin >= 4)
         load('trained_weights.mat');
