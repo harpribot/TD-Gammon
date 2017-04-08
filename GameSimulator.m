@@ -102,26 +102,23 @@ while(whoWon == ID.NULL)
                 % check move format
                 if(size(userMove,2) <= 8 && mod(size(userMove,2),2) == 0)
                     userMove = horzcat(userMove,zeros(1,8 - size(userMove,2)));
-                    % check move direction
-                    if(MoveDirectionValid(userMove))
-                        [~,indx]=ismember(userMove,favorability(:,2:end),'rows');
-                        % check move valid
-                        if(indx ~= 0)
-                            correctMoveMade = true;
-                            fprintf('Probability Evaluations:\n');
-                            printMoveEvaluations(favorability,userTurn);
-                            % print user move from the evaluation table
-                            disp('User Move');
-                            printMoveEvaluations(favorability(indx,:),userTurn);
-                            % calculate how suboptimal the user is playing
-                            error(end+1) = abs(favorability(indx,1) - favorability(1,1));
-                            userError(1) = mean(error) * nnz(error)/length(error);
-                            userError(2) = nnz(error);
-                            userError(3) = length(error);
-                            % update the NN, readable board and userTurn
-                            boardPresent = generateBoardFromMove(userMove,boardPresent,false);
-                            boardReadable = generateReadableBoard(boardPresent);
-                        end
+                    % check if move is in table
+                    [~,indx]=ismember(userMove,favorability(:,2:end),'rows');
+                    if(indx ~= 0)
+                        correctMoveMade = true;
+                        fprintf('Probability Evaluations:\n');
+                        printMoveEvaluations(favorability,userTurn);
+                        % print user move from the evaluation table
+                        disp('User Move');
+                        printMoveEvaluations(favorability(indx,:),userTurn);
+                        % calculate how suboptimal the user is playing
+                        error(end+1) = abs(favorability(indx,1) - favorability(1,1));
+                        userError(1) = mean(error) * nnz(error)/length(error);
+                        userError(2) = nnz(error);
+                        userError(3) = length(error);
+                        % update the NN, readable board and userTurn
+                        boardPresent = generateBoardFromMove(userMove,boardPresent,false);
+                        boardReadable = generateReadableBoard(boardPresent);
                     end
                 end
                 if (~correctMoveMade)
