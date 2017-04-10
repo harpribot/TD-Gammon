@@ -27,7 +27,7 @@
 %               k - number of possible moves
 %               move(i,:) = 
 %                   [start_first,stop_first,start_second,stop_second,rest 2 moves for double]
-% userTurn -> 0 --> AI's Turn (AI we are training)
+% userTurn   -> 0 --> AI's Turn (AI we are training)
 %               1 --> Opponents Turn
 % board nomenclature -> The board numbering starts from user's home. Agent
 %                       moves anticlockwise while user moves clockwise when
@@ -35,7 +35,7 @@
 % 
 
 %% Clean Up
-close all; clear all; clc;
+close all; clear variables; clearvars; clc;
 
 %% Initialize
 rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
@@ -52,10 +52,10 @@ userWins = 0;
 
 %% train through RL 
 MAX_TRAIN = 900000;
-MIN_TRAIN = 100000;
+MIN_TRAIN = 175000;
 % Initial probability goal
-min_start_goal = 0.49;
-max_start_goal = 0.51;
+min_start_goal = 0.495;
+max_start_goal = 0.505;
 for epoch = 1:MAX_TRAIN
     fprintf('Game # %d\n',epoch);
     % roll dice to choose first player
@@ -81,7 +81,7 @@ for epoch = 1:MAX_TRAIN
             break;
         else
             % save the data if it is decent
-            filename = 'trained_weights';
+            filename = 'trained_weights_tmp';
             wins_AI_User = [agentWins,userWins];
             epochs_trained = epoch;
             date_trained = datetime;
