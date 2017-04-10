@@ -74,7 +74,7 @@ Hat tip to anyone who's code was used and papers referenced
 
 >N. Zadeh, “On doubling in tournament backgammon,”<br/>
 >Management Science, vol. 23, no. 9, pp. 986–993, 1977.<br/>
->http://www.bkgm.com/articles/Zadeh/OnDoublingInTournamentBackgammon/OnDoublingInTournamentBackgammon.pdf<br/>
+>http://www.bkgm.com/articles/Zadeh/OnDoublingInTournamentBackgammon/<br/>
 
 >E. B. Keeler and J. Spencer, “Optimal doubling in backgammon,”<br/>
 >Operations Research, vol. 23, no. 6, pp. 1063–1071, 1975.<br/>
