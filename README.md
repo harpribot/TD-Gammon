@@ -70,6 +70,7 @@ Hat tip to anyone who's code was used and papers referenced
 
 >N.  Zadeh  and  G.  Kobliska, “On  optimal  doubling  in  backgammon,”<br/>
 >Management Science, vol. 23, no. 8, pp. 853–858, 1977.<br/>
+>http://www.bkgm.com/articles/Zadeh/OnDoublingInTournamentBackgammon/<br/>
 
 >N. Zadeh, “On doubling in tournament backgammon,”<br/>
 >Management Science, vol. 23, no. 9, pp. 986–993, 1977.<br/>
