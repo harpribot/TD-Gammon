@@ -1,6 +1,6 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Harshal Priyadarshi
 % See the License document for further information
-function board = generateInitialBoard( userChance )
+function board = generateInitialBoard( player )
 % To Generate the initial board for the play
 board = zeros(198,1);
 % update neuron representations - lower 4 neurons - agent | upper 4 - user
@@ -25,7 +25,7 @@ for position = [1,12,17,19]
 end
 % update two neurons for player's move 193/194(On/Off)->agent's move
 %                                      193/194(Off/On)->user's move
-if(userChance == 1)
+if(player == 1)
     board(193) = 0;
     board(194) = 1;
 else
@@ -36,5 +36,4 @@ end
 % pieces on the bar are zeros so 195/196(Off/Off)
 % pieces borne off are zero so 197/198(Off/Off)
 
-end
-
+end % function

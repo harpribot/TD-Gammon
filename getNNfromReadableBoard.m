@@ -1,7 +1,8 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Harshal Priyadarshi
 % See the License document for further information
-function NNboard = getNNfromReadableBoard( readableBoard,userChance )
+function NNboard = getNNfromReadableBoard(readableBoard,player)
 % obtain the NN board from the readable board for testing purposes
+%   player - 0: agent's turn, 1: user's  turn
 
 NNboard = zeros(198,1);
 
@@ -38,14 +39,11 @@ for i = 1:27
         NNboard(startUser:endUser) = neuronUser;
     end
         
-        
 end
-if(userChance == 1)
+if(player == 1)
     NNboard(194) = 1;
 else
     NNboard(193) = 1;
 end
 
-
-end
-
+end % function

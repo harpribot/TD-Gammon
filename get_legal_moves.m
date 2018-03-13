@@ -1,183 +1,76 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License - Author - Tim Sheppard
 % See the License document for further information
-function legal_moves = get_legal_moves(board,die,userChance)
+function legal_moves = get_legal_moves(board,die,player)
 % get all the legal moves for throw of just one die
-% General Knowledge - (3,1) is 1 pair of die which has 2 die
-% board - present state of readable board
-% die - the die for which we are generating the move
-% userChance - 0 - agent's chance
-%              1 - user's chance
-% state --> 0 - bar state
-%           1 - bearing Off State
-%           2 - all other situation
+% INPUTS: 
+%   board  - present state of readable board
+%   die    - the die for which we are generating the move
+%   player - 0: agent's moves, 1: user's  moves
+% OUTPUT: 
+    legal_moves = []; % - table of legal moves
 
-legal_moves = [];
+%% Setup variables
+id  = player + 1;    % id of the current player
+nid = (~player) + 1; % id of NOT the current player
+% Array of player info [1 is for AI, 2 is for user]
+playerHome  = [25,0]; 
+playerTraj  = [1,-1];
+% Info for the current player
+start = playerHome(nid); % Index of start
+home  = playerHome(id);  % Index of home (goal)
+traj  = playerTraj(id);  % trajectory of moves 
 
-%% what is the present State of the board
-% the game is over so no move possible- return
-if(board(2,2) == 15 || board(1,27) == 15)
-    legal_moves = [];
-    return;
-% bar state
-elseif(board(userChance + 1,1) ~= 0)
-    state = 0;
-% can start bearing off
-elseif(bearOffPossible(board,userChance) == true)
-    state = 1;
-% all other situation
-else
-    state = 2;
-end
-% start from location fartherst away from home for the moving side
-if(userChance == 1)
-    position = 24;
-else
-    position = 1;
-end
+%% Find legal moves
+% Checker(s) on the bar
+if (board(id,1) > 0) 
+	moveStart = -1;
+	moveEnd = abs(start - die);
+	if(board(nid, moveEnd + 2) < 2)
+		legal_moves = [moveStart,moveEnd];
+	end % if
+% Bearing off legal
+elseif (bearOffPossible(board,player))
+	% Check if checker available at the exact place for bearing off
+	moveStart = abs(home - die);
+	if(board(id,moveStart + 2) > 0)
+		legal_moves = [moveStart,home];
+	end % if
+	% see if there are legal moves that do not bear off a checker
+	for i = 6:-1:(die + 1)
+		moveStart = abs(home - i);
+		moveEnd = abs(home - i) + (traj * die); 
+		% if user checkers available and die move possible
+		if(board(id,moveStart + 2) > 0 && board(nid,moveEnd + 2) < 2)
+			legal_moves = [legal_moves;[moveStart,moveEnd]];
+		end % if 
+	end % for 
+	% if no legal moves so far 
+	% bear off the nearest lower checker from the exact bearing off position
+	if(isempty(legal_moves)) 
+		for i = (die - 1):-1:1
+			moveStart = abs(home - i);
+			if(board(id,moveStart + 2) > 0)
+				legal_moves = [moveStart, home];
+				break;
+			end % if 
+		end % for 
+	end % if 
+% Normal play
+elseif ((board(2,2) < 15) && (board(1,27) < 15))
+	% Loop through the board 24:-1:2 for AI, 1:1:23 for user
+	for moveStart = abs(start-1):traj:abs(home-2)
+		% if movement possible for that move
+		moveEnd = moveStart + (traj * die);
+		% check if the end is valid
+		if((moveEnd < 25) && (moveEnd > 0))
+			% Check if there is a checker at start point and end is legal
+			if(board(id,moveStart + 2) > 0 && board(nid,moveEnd + 2) < 2)
+				legal_moves = [legal_moves;[moveStart,moveEnd]];
+			end % if 
+		else 
+			break; % end of legal moves has been reached so exit loop
+		end % if 
+	end % for 
+end % if 
 
-if(userChance == 1)
-    while(position > 0)
-        if(state == 0)
-            positionStart = -1;
-            positionEnd = 25 - die;
-            if(board(1, positionEnd + 2) >= 2)
-                break; % come out of the loop and return NULL legal_moves
-            else
-                legal_moves = [positionStart,positionEnd];
-                break; % come out of the loop as with one die and checker
-                       % on the bar only one move is possible
-            end
-        elseif(state == 1)
-            % case 1: Checker available at the exact place for bearing off
-               if(board(2,die + 2) > 0)
-                   legal_moves = [die,0];
-                   break;
-               end
-               % case1 fails - check presence of case2
-               % case2: legal move from higher position checker
-               case2passed = false;
-               for i = 6:-1:(die + 1)
-                   % if user checkers available and die move possible
-                   if(board(2,i + 2) > 0 && board(1,i + 2 - die) < 2)
-                       positionStart = i;
-                       positionEnd = i - die;
-                       legal_moves = [legal_moves;[positionStart,positionEnd]];
-                       case2passed = true;                   
-                   end
-               end
-               %legal_moves
-               if(case2passed == true) % case 2 pass - break and move on.
-                   break;
-               end
-               % case 2 fails - check presence of case 3
-               % case 3: bear off the nearest lower checker from the exact
-               % bearing off position - if case1 & case 2 fails- case3
-               % always passes
-               case3passed = false;
-               for i = (die - 1):-1:1
-                   if(board(2,i + 2) > 0)
-                       positionStart = i;
-                       positionEnd = 0;
-                       legal_moves = [positionStart, positionEnd];
-                       case3passed = true;
-                       break;
-                   end
-               end
-               % break away as job is done
-               if(case3passed == true)
-                   break;
-               else
-                   legal_moves = [];
-                   return;
-               end
-        else % normal case
-            % if movement possible for that move
-            if(position - die > 0)
-                if(board(2,position + 2) > 0 && board(1, position + 2 - die) < 2)
-                    positionStart = position;
-                    positionEnd = position - die;
-                    legal_moves = [legal_moves;[positionStart,positionEnd]];
-                    position = position - 1;
-                else
-                    position = position - 1;
-                end
-            else
-                position = position - 1;
-            end
-        end                  
-    end
-% agent's chance    
-else
-    while(position < 25)
-        if(state == 0)
-            positionStart = -1;
-            positionEnd = die;
-            if(board(2, positionEnd + 2) >= 2)
-                break; % come out of the loop and return NULL legal_moves
-            else
-                legal_moves = [positionStart,positionEnd];
-                break; % come out of the loop as with one die and checker
-                       % on the bar only one move is possible
-            end
-        elseif(state == 1)
-            % case 1: Checker available at the exact place for bearing off
-               if(board(1,25 - die + 2) > 0)
-                   legal_moves = [25 - die,25];
-                   break;
-               end
-               % case1 fails - check presence of case2
-               % case2: legal move from higher position checker
-               case2passed = false;
-               for i = 6:-1:(die + 1)
-                   % if user checkers available and die move possible
-                   if(board(1,25 - i + 2) > 0 && board(2,25 - i + 2 + die) < 2)
-                       positionStart = 25 - i;
-                       positionEnd = (25 - i) + die;
-                       legal_moves = [legal_moves;[positionStart,positionEnd]];
-                       case2passed = true;
-                   end
-                       
-               end
-               if(case2passed == true) % case 2 pass - make legal move
-                   break;
-               end
-               % case 2 fails - check presence of case 3
-               % case 3: bear off the nearest lower checker from the exact
-               % bearing off position - if case1 & case 2 fails- case3
-               % always passes
-               case3passed = false;
-               for i = (die - 1):-1:1
-                   if(board(1,25 - i + 2) > 0)
-                       positionStart = 25 - i;
-                       positionEnd = 25;
-                       legal_moves = [positionStart, positionEnd];
-                       case3passed = true;
-                       break;
-                   end
-               end
-               % break away as job is done
-               if(case3passed == true)
-                   break;
-               else
-                   legal_moves = [];
-                   return;
-               end
-        else % normal case
-            % if movement possible for that move
-            if(position + die < 25)
-                if(board(1,position + 2) > 0 && board(2, position + 2 + die) < 2)
-                    positionStart = position;
-                    positionEnd = position + die;
-                    legal_moves = [legal_moves;[positionStart,positionEnd]];
-                    position = position + 1;
-                else
-                    position = position + 1;
-                end
-            else
-                position = position + 1;
-            end
-        end                  
-    end
-end
-end
-
+end % function 

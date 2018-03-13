@@ -1,131 +1,163 @@
-% Copyright @2015 MIT License - Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License 
+% Author - Harshal Priyadarshi - Tim Sheppard - Garrett Kaiser
 % See the License document for further information
-clc;
-% Game Simulation for TD-Gammon
-%% load the learnt parameters after 16k iterations
-load('bestUser16kIteration.mat');
+% Backgammon Game Simulation for TD-Gammon
 
-%% initiate the boolean winner index = 0 (computer won) = 1 (user won) = 2 (no info)
-whoWon = 2;
+%% Clean up
+close all; clear variables; clearvars; clc;
 
-
-%% throw in dice to decide whose move
-areDiesSame = true;
-while(areDiesSame == true)
-    agentProxyDie = randi(6,[1,1]);
-    userProxyDie = str2double(input('Enter the value of your die, Please.[1 to 6]: ','s'));
-    if(agentProxyDie ~= userProxyDie)
-        areDiesSame = false;
-        if(agentProxyDie > userProxyDie)
-            userChance = 0;
-        else
-            userChance = 1;
-        end
-    end
+%% Initial Setup
+% seed rand with epoch time 
+rng(mod((todatenum(cdfepoch(now)))*(10.^11),(2.^32)));
+% load the learned parameters 
+load('trained_weights.mat');
+fprintf('Weights after %d iterations \nTrained on %s \n\n',epochs_trained, datestr(date_trained));
+% throw in dice to decide whose first
+dice = [0,0];
+while (dice(1) == dice(2))
+    dice = rollDice();
+    userTurn = (dice(2) > dice(1));
 end
-
-%% start initial board
-boardPresent = generateInitialBoard(userChance);
+firstTurn = true;
+whoWon = ID.NULL;
+% initial board
+boardPresent = generateInitialBoard(userTurn);
 boardReadable = generateReadableBoard(boardPresent);
-disp('Board Outlook at present:');
-disp(boardReadable);
-%% initial die
-dice = [agentProxyDie, userProxyDie];
-fprintf('It is chance of [0 = Computer, 1 = User] %d and dice Roll is [%d,%d]\n',userChance,dice(1),dice(2));
-%% run a simulation till no result has been obtained
-while(whoWon == 2)
-     if(userChance == 0)
-         boardRevertReadable = changeRoles(boardReadable);
-         boardRevert = getNNfromReadableBoard(boardRevertReadable,1);
-         favorability = TestRun( V_InHide, V_HideOut, boardRevertReadable, boardRevert, dice,1) % userChance = 1 as our Agent-2 was the best learner while training
-         
-         bestMoveTemp = favorability(1,2:end);
-         bestMove = bestMoveTemp;
-         for i = [1,3,5,7]
-             if(bestMoveTemp(i + 1) ~= 0 || bestMoveTemp(i) ~= 0)
-                 bestMove(i) = 25 - bestMoveTemp(i);
-                 bestMove(i + 1) = 25 - bestMoveTemp(i + 1);
-             end
-             bestMove(bestMove == 26) = -1;
-         end
-         disp('Computers Move:');
-         disp(bestMove);
-         % update the NN,readable board and userChance
-         boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
-         boardReadable = generateReadableBoard(boardPresent);
-         disp('Board Outlook at present:');
-         disp(boardReadable);
-         userChance = ~userChance;
-         fprintf('It is chance of [0 = Computer, 1 = User] %d\n', userChance);
-     else
-         correctMoveMade = false;
-         while(correctMoveMade == false)
-            userMove = str2num(input('Write Your move in vector format separated by commas, Please.(0 to surrender):', 's'));
-            % in case the user surrenders his move - Enter 0 if wanna
-            % surrender
-            if(userMove == 0)
-                boardPresent(193) = 1;
-                boardPresent(194) = 0;
-                userChance = ~userChance;
-                fprintf('It is chance of [0 = Computer, 1 = User] %d \n', userChance);
+boardIndex = -1:1:25;
+disp('Board State at present:');
+printBoard(boardReadable);
+% doubling cube object [cubeValue,cubeOwner]
+doublingCube = {1,ID.NULL};
+% Track error in moves made by user
+error = []; % optimal move evaluation - chosen move evaluation
+userError = [0.0,0.0,0.0]; % [skillEvaluation, number of suboptimal moves, total moves]
+
+%% Play Game
+while(whoWon == ID.NULL)
+    
+    if(userTurn)
+        disp('It is the Users Turn');
+    else
+        disp('It is the AIs Turn');
+    end
+    
+    gameProbability = evaluateBoardNN(boardPresent, V_InHide, V_HideOut); 
+    % Doubling Decision
+    if(userTurn && (doublingCube{2}==ID.USER || doublingCube{2}==ID.NULL))
+        % ask user for double decision
+        userPropose = input('Would you like to double? Y/N:', 's');
+        if(strcmpi(userPropose,'Y') || strcmpi(userPropose,'Yes'))
+            % ask agent to accept double
+            doublingCube{2} = ID.USER; % need this so that evalDoubling knows what to calc
+            agentAccept = evalDoubling(gameProbability,ID.AI,userError,doublingCube,boardReadable);
+            if (agentAccept)
+                % double and give ownership to agent
+                doublingCube{1} = doublingCube{1}*2;
+                doublingCube{2} = ID.AI;
+                disp('AI has accepted the doubling');
+            else
+                whoWon = ID.USER; 
+                fprintf('AI has declined the doubling\n User Wins.  Match value was %d.\n\n', doublingCube{1});
+                break; 
+            end
+        end
+    elseif (doublingCube{2}==ID.AI || doublingCube{2}==ID.NULL)
+        % ask agent for double decision
+        agentPropose = evalDoubling(gameProbability,ID.AI,userError,doublingCube,boardReadable);
+        if(agentPropose)
+            % ask user to accept double
+            userAccept = input('The AI would like to double\nWill you accept a double? Y/N:', 's');
+            if (strcmpi(userAccept,'Y')||strcmpi(userAccept,'Yes'))
+                % double and give owner ship to user
+                doublingCube{1} = doublingCube{1}*2;
+                doublingCube{2} = ID.USER;
+            else
+                whoWon = ID.AI; 
+                fprintf('Double declined\n Agent Wins. Match value was %d.\n\n', doublingCube{1});
                 break;
             end
-            % check if the move is right
-            if(size(userMove,2) <= 8 && mod(size(userMove,2),2) == 0)
-                userMove = horzcat(userMove,zeros(1,8 - size(userMove,2)));
-                %%%%% temporary work around the -1 bug - PART 1
-                userMove(userMove == -1) = 26;
-                %%%%% bug section ends
-                if(sum(userMove([1,3,5,7]) >= userMove([2,4,6,8])) == 4)
-                    %%%%% temporary work around the -1 bug - PART 2
-                    userMove(userMove == 26) = -1;
-                    %%%%% bug section ends
-                    favorability = TestRun( V_InHide, V_HideOut, boardReadable, boardPresent, dice,1)
+        end
+    end
+    
+    % New Roll
+    if (~firstTurn)
+        dice = rollDice();
+    end
+    disp('Dice Throw:');
+    disp(dice);
+    
+    % Move Decision
+    if(userTurn)
+        % Users Turn
+        favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, userTurn);
+        if (isempty(favorability)) 
+            % no legal moves
+            disp('User has no legal moves, press "enter" to continue');pause;
+            boardPresent(193) = 1;
+            boardPresent(194) = 0;
+        else
+            correctMoveMade = false;
+            while(correctMoveMade == false)
+                userMove = str2num(input('Write your move in vector format separated by commas:', 's'));
+                % check move format
+                if(size(userMove,2) <= 8 && mod(size(userMove,2),2) == 0)
+                    userMove = horzcat(userMove,zeros(1,8 - size(userMove,2)));
+                    % check if move is in table
                     [~,indx]=ismember(userMove,favorability(:,2:end),'rows');
                     if(indx ~= 0)
                         correctMoveMade = true;
-                        disp('Yours Move:');
-                        disp(userMove);
-                        % update the NN, readable board and userChance
+                        fprintf('Probability Evaluations:\n');
+                        printMoveEvaluations(favorability,userTurn);
+                        % print user move from the evaluation table
+                        disp('User Move');
+                        printMoveEvaluations(favorability(indx,:),userTurn);
+                        % calculate how suboptimal the user is playing
+                        error(end+1) = abs(favorability(indx,1) - favorability(1,1));
+                        userError(1) = mean(error) * nnz(error)/length(error);
+                        userError(2) = nnz(error);
+                        userError(3) = length(error);
+                        % update the NN, readable board and userTurn
                         boardPresent = generateBoardFromMove(userMove,boardPresent,false);
                         boardReadable = generateReadableBoard(boardPresent);
-                        disp('Board Outlook at present:');
-                        disp(boardReadable);
-                        userChance = ~userChance;
-                        fprintf('It is chance of [0 = Computer, 1 = User] %d\n', userChance);
                     end
                 end
-            end
-         end
-     end
-     
-     % check if game has ended
-     if(boardReadable(2,2) == 15)
-         whoWon = 1; % user won
-         fprintf('User Won');
-     elseif(boardReadable(1,27) == 15)
-         whoWon = 0; % agent won
-         fprintf('Agent Won');
-     else  % repeat with a new die
-         equalDiceAllowed = 6;
-         dice = randi(6,[1,2]);
-         if(dice(1) == dice(2))
-             while(equalDiceAllowed > 0)
-                 dice = randi(6,[1,2]);
-                 if(dice(1) ~= dice(2))
-                     break;
-                 else
-                     equalDiceAllowed = equalDiceAllowed - 1;
-                 end
-             end
-         end
-         if(dice(1) == dice(2))
-            dice = [dice,dice];
-         end
-         disp('Dice Throw:');
-         disp(dice);
-     end
-     
-     
+                if (~correctMoveMade)
+                    disp('Invalid move!');
+                end
+            end %  while(correctMoveMade == false)
+        end
+    else
+        %{ 
+            AIs Turn
+        %}
+        favorability = TestRun(V_InHide, V_HideOut, boardReadable, boardPresent, dice, userTurn);
+        if (isempty(favorability)) 
+            % no legal moves
+            disp('AI has no legal moves');
+            boardPresent(193) = 0;
+            boardPresent(194) = 1;
+        else
+            bestMove = favorability(1,2:end);
+            disp('AIs Move:');
+            % printMoveEvaluations(favorability,userTurn);
+            printMoveEvaluations([favorability(1,1),bestMove],userTurn);
+            % update the NN board and readable board
+            boardPresent = generateBoardFromMove(bestMove,boardPresent,false);
+            boardReadable = generateReadableBoard(boardPresent);
+        end
+    end
+    disp('Board State at present:');
+    printBoard(boardReadable);
+    userTurn = ~userTurn; 
+    firstTurn = false;
+
+    % check if game has ended
+    if(boardReadable(2,2) == 15)
+        whoWon = ID.USER; 
+        fprintf('User Wins.  Match value was %d.\n\n', doublingCube{1});
+    elseif(boardReadable(1,27) == 15)
+        whoWon = ID.AI; 
+        fprintf('Agent Wins. Match value was %d.\n\n', doublingCube{1});
+    end
          
-end
+end 

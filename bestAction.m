@@ -1,40 +1,37 @@
-% Copyright @2015 MIT License Author - Harshal Priyadarshi - IIT Roorkee
+% Copyright @2017 MIT License
 % See the License document for further information
-function [eval,boardNext] = bestAction(possibleMoves,boardPresent...
-                            ,nextMoveMyMove,V_InHidden,V_HiddenOut,userChance)
+% Author - Harshal Priyadarshi
+% Revised - Garrett Kaiser 4/2/2017
+function [eval,boardNext] = bestAction(possibleMoves,boardPresent,V_InHidden,V_HiddenOut,player)
 
-if(size(possibleMoves) >= 1)                        
-    if(userChance == 0)
-        eval = -inf;
+    if(size(possibleMoves) ~= 0)                        
+        possibleMoves = unique(possibleMoves,'rows');
+        favorability = zeros(size(possibleMoves,1),size(possibleMoves,2) + 1);
+        favorability(:,2:size(possibleMoves,2) + 1) = possibleMoves;
         for i = 1:size(possibleMoves,1)
-            boardTemp = generateBoardFromMove(possibleMoves(i,:),boardPresent,nextMoveMyMove);
-            if(eval < evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut))
-                eval = evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut);
-                boardNext = boardTemp;
-            end
+            boardTemp = generateBoardFromMove(possibleMoves(i,:),boardPresent,false);
+            tempEvalVal = evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut);
+            favorability(i,1) = tempEvalVal;
+        end
+        if(~player)
+            favorability = sortrows(favorability,-1);
+        else
+            favorability = sortrows(favorability,1);
         end
 
+        eval = favorability(1,1);
+        move = favorability(1,2:end);
+        boardNext = generateBoardFromMove(move,boardPresent,false);
     else
-        eval = inf;
-        for i = 1:size(possibleMoves,1)
-            boardTemp = generateBoardFromMove(possibleMoves(i,:),boardPresent,nextMoveMyMove);
-            if(eval > evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut))
-                eval = evaluateBoardNN(boardTemp,V_InHidden,V_HiddenOut);
-                boardNext = boardTemp;
-            end
+        boardNext = boardPresent;
+        if(player)
+            boardNext(193) = 1;
+            boardNext(194) = 0;
+        else
+            boardNext(193) = 0;
+            boardNext(194) = 1;
         end
+        eval = evaluateBoardNN(boardNext,V_InHidden,V_HiddenOut);
     end
-else
-    boardNext = boardPresent;
-    if(boardNext(193)==1)
-        boardNext(193) = 0;
-        boardNext(194) = 1;
-    else
-        boardNext(193) = 1;
-        boardNext(194) = 0;
-    end
-    eval = evaluateBoardNN(boardNext,V_InHidden,V_HiddenOut);
-end
 
-end
-
+end % function
